@@ -1,11 +1,8 @@
 import mongoose from "mongoose";
 import { openMongo } from "../lib/mongo-per-request.js";
 import { getProductModel } from "../lib/models/Product.js";
-import { z } from "zod";
 import { json, UpdateProduct, getId } from "../lib/helpers/products.shared.js";
 import { requireAdmin } from "../lib/auth.js";
-
-
 
 export async function handler(event) {
   const { conn, close } = await openMongo();
@@ -14,7 +11,8 @@ export async function handler(event) {
   try {
     const id = getId(event);
     if (!id) return json(400, { message: "missing product id" });
-    if (!mongoose.Types.ObjectId.isValid(id)) return json(400, { message: "invalid product id" });
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return json(400, { message: "invalid product id" });
 
     if (event.httpMethod === "GET") {
       const doc = await Product.findById(id).lean().exec();
@@ -27,17 +25,27 @@ export async function handler(event) {
       if (!gate.ok) return json(gate.status, gate.body);
 
       let body;
-      try { body = JSON.parse(event.body || "{}"); }
-      catch { return json(400, { message: "invalid JSON body" }); }
+      try {
+        body = JSON.parse(event.body || "{}");
+      } catch {
+        return json(400, { message: "invalid JSON body" });
+      }
 
       const parsed = UpdateProduct.safeParse(body);
       if (!parsed.success) {
-        return json(400, { message: "invalid body", issues: parsed.error.format() });
-        }
+        return json(400, {
+          message: "invalid body",
+          issues: parsed.error.format(),
+        });
+      }
 
       const updated = await Product.findByIdAndUpdate(
-        id, { $set: parsed.data }, { new: true, runValidators: true }
-      ).lean().exec();
+        id,
+        { $set: parsed.data },
+        { new: true, runValidators: true }
+      )
+        .lean()
+        .exec();
 
       if (!updated) return json(404, { message: "product not found" });
       return json(200, updated);
@@ -49,7 +57,11 @@ export async function handler(event) {
 
       const res = await Product.findByIdAndDelete(id).lean().exec();
       if (!res) return json(404, { message: "product not found" });
-      return { statusCode: 204, headers: { "Content-Type": "application/json" }, body: "" };
+      return {
+        statusCode: 204,
+        headers: { "Content-Type": "application/json" },
+        body: "",
+      };
     }
 
     return json(405, { message: "Method not allowed" });
