@@ -8,6 +8,13 @@
   included_files = ["netlify/lib/**"]
   external_node_modules = ["mongoose"]
 
+
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/:splat"
+  status = 200
+  force = false
+
 # API endpoints
 [[redirects]]
   from = "/api/products"
