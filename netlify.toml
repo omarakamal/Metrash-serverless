@@ -1,7 +1,8 @@
 [build]
-  command   = "npm run build"
+  command = "ls -R && npm run build"
   publish   = "dist"
   functions = "netlify/functions"
+  
 
 
 [functions]
