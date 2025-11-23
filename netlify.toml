@@ -5,16 +5,12 @@
   
 
 
-[build.commands]
-  pre_build = "echo '--- FILES ---' && ls -R"
-
-
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
   included_files = ["netlify/lib/**"]
-  # external_node_modules = ["mongoose"]
+  external_node_modules = ["mongoose"]
 
 
 # [[redirects]]
@@ -28,7 +24,6 @@
   from = "/api/products"
   to   = "/.netlify/functions/products"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/api/products/:id"
