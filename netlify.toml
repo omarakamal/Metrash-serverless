@@ -7,10 +7,10 @@
 
 
 [functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  included_files = ["netlify/lib/**"]
-  external_node_modules = ["mongoose"]
+ directory = "netlify/functions"
+ node_bundler = "esbuild"
+ included_files = ["netlify/lib/**"]
+ external_node_modules = ["mongoose"]
 
 
 [[redirects]]
@@ -50,7 +50,7 @@
   to   = "/.netlify/functions/me"
   status = 200
 
-  [[redirects]]
+[[redirects]]
   from = "/auth/seed"
   to   = "/.netlify/functions/seed"
   status = 200
