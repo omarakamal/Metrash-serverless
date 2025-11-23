@@ -8,7 +8,7 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
   included_files = ["netlify/lib/**"]
-  external_node_modules = ["mongoose"]
+  # external_node_modules = ["mongoose"]
 
 
 [[redirects]]
