@@ -6,8 +6,8 @@ export async function fetchProducts(paramsObj = {}) {
   Object.entries(paramsObj).forEach(([k, v]) => {
     if (v !== undefined && v !== null && String(v).trim() !== "") params.set(k, String(v));
   });
-  console.log(`/api/products?${params.toString()}`)
-  const res = await axios.get(`/api/products?${params.toString()}`);
+  console.log(`/.netlify/functions/products?${params.toString()}`)
+  const res = await axios.get(`/.netlify/functions/products?${params.toString()}`);
   console.log(res)
   if (!res.statusText) throw new Error("Failed to fetch products");
   return res.data;
@@ -15,7 +15,7 @@ export async function fetchProducts(paramsObj = {}) {
 export async function fetchProduct(id) {
   if (!id) throw new Error("Missing product id");
   console.log(id)
-  const res = await fetch(`/api/products/${id}`);
+  const res = await fetch(`/.netlify/functions/products/${id}`);
   if (!res.ok) {
     if (res.status === 404) throw new Error("Product not found");
     throw new Error("Failed to fetch product");
@@ -26,7 +26,7 @@ export async function fetchProduct(id) {
 
 
 export async function createProduct({ name, price, description = "", imageUrl = "" }) {
-  const res = await fetch("/api/products", {
+  const res = await fetch("/.netlify/functions/products", {
     method: "POST",
     credentials: "include", // important if your POST is admin-gated by a cookie
     headers: { "Content-Type": "application/json" },
@@ -58,8 +58,8 @@ export async function updateProduct(id, payload, { queryParamId = false } = {}) 
   // If your netlify.toml maps /api/products/:id -> /.netlify/functions/…?id=:id,
   // this path works directly:
   const url = queryParamId
-    ? `/api/products?id=${encodeURIComponent(id)}`
-    : `/api/products/${encodeURIComponent(id)}`;
+    ? `/.netlify/functions/products?id=${encodeURIComponent(id)}`
+    : `/.netlify/functions/products/${encodeURIComponent(id)}`;
 
   const res = await fetch(url, {
     method: "PUT",
@@ -85,8 +85,8 @@ export async function deleteProduct(id, opts = {}) {
   const { queryParamId = false, signal } = opts;
 
   const url = queryParamId
-    ? `/api/products?id=${encodeURIComponent(id)}`
-    : `/api/products/${encodeURIComponent(id)}`;
+    ? `/.netlify/functions/products?id=${encodeURIComponent(id)}`
+    : `/.netlify/functions/products/${encodeURIComponent(id)}`;
 
   const res = await fetch(url, {
     method: "DELETE",
