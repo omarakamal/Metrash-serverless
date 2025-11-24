@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     console.log('fetchme function called')
     setLoading(true);
     try {
-      const res = await axios.get('/api/auth/me', { credentials: 'include' });
+      const res = await axios.get('/.netlify/functions/me', { credentials: 'include' });
       console.log('fetchme: ', res )
       console.log('res.data',res.data)
       if (!res.statusText) {
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
 
 
   async function login({ email, password }) {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch('/.netlify/functions/login', {
       method: 'POST',
       credentials: 'include', // must include cookies
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+    await fetch('/.netlify/functions/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
     setUser(null);
   }
 
