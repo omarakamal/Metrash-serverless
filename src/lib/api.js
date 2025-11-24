@@ -1,17 +1,44 @@
 import axios from 'axios'
+
+
+
 export async function fetchProducts(paramsObj = {}) {
-  console.log('Function called')
+  console.log('Function called');
 
   const params = new URLSearchParams();
   Object.entries(paramsObj).forEach(([k, v]) => {
     if (v !== undefined && v !== null && String(v).trim() !== "") params.set(k, String(v));
   });
-  console.log(`/.netlify/functions/products?${params.toString()}`)
-  const res = await axios.get(`/.netlify/functions/products?${params.toString()}`);
-  console.log(res)
-  if (!res.statusText) throw new Error("Failed to fetch products");
-  return res.data;
+
+  const url = `/.netlify/functions/products${params.toString() ? `?${params.toString()}` : ''}`;
+  console.log('Requesting', url);
+
+  try {
+    // axios will throw for non-2xx responses by default, so this is safe
+    const res = await axios.get(url, { timeout: 15000 });
+    // Prefer checking status number
+    if (typeof res.status !== 'number' || res.status < 200 || res.status >= 300) {
+      throw new Error(`Failed to fetch products (status ${res.status})`);
+    }
+    // If you expect an object with items, normalize it
+    const data = res.data;
+    return data;
+  } catch (err) {
+    // Normalize axios error messages
+    if (err.response) {
+      // server responded with a non-2xx status
+      throw new Error(err.response.data?.error || `Failed to fetch products (status ${err.response.status})`);
+    } else if (err.request) {
+      // request made but no response
+      throw new Error('No response from server when fetching products');
+    } else {
+      // other errors
+      throw new Error(err.message || 'Failed to fetch products');
+    }
+  }
 }
+
+
 export async function fetchProduct(id) {
   if (!id) throw new Error("Missing product id");
   console.log(id)
