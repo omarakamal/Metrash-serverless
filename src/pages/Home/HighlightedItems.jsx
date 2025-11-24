@@ -14,9 +14,9 @@ export default function HighlightedItems(){
       try {
         setLoading(true);
         const data = await fetchProducts({ limit: 8 });
-        console.log(data)
+        console.log('FETCHED PRODUCTS HIGHLIGHTED: ',data)
         if (on) setItems(data.items || []);
-      } catch (e) { if (on) setError(e.message); }
+      } catch (e) { console.log(e) ;if (on) setError(e.message); }
       finally { if (on) setLoading(false); }
     })();
     return () => { on = false; };
