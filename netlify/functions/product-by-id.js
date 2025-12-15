@@ -2,6 +2,7 @@ import { db } from '../lib/db.js';
 import { products } from '../db/schema/product.js';
 import { eq } from 'drizzle-orm';
 import { json, UpdateProduct, getId } from '../lib/helpers.js';
+import { requireAdmin } from '../lib/auth.js';
 
 export async function handler(event) {
   try {
@@ -31,6 +32,9 @@ export async function handler(event) {
     // PUT / PATCH /products/:id
     // ─────────────────────────────
     if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
+      let gate = requireAdmin(event)
+      if(!gate.ok) return json(gate.status, gate.body);
+
       let body;
       try {
         body = JSON.parse(event.body || '{}');
@@ -63,6 +67,8 @@ export async function handler(event) {
     // DELETE /products/:id
     // ─────────────────────────────
     if (event.httpMethod === 'DELETE') {
+      let gate = requireAdmin(event)
+      if(!gate.ok) return json(gate.status, gate.body);
       const deleted = await db
         .delete(products)
         .where(eq(products.id, id))

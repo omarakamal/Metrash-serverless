@@ -2,6 +2,8 @@ import { count, ilike, desc } from 'drizzle-orm';
 import { db } from '../lib/db';
 import { products } from '../db/schema/product';
 import { CreateProduct } from '../lib/helpers'; // assuming you have this
+import { requireAdmin } from '../lib/auth';
+import { json, intOr } from '../lib/helpers';
 
 export async function handler(event) {
   try {
@@ -44,6 +46,10 @@ return json(200, {
 
     // CREATE PRODUCT
     if (event.httpMethod === "POST") {
+
+      let gate = requireAdmin(event)
+      if(!gate.ok) return json(gate.status, gate.body);
+
       let body;
       try {
         body = JSON.parse(event.body || "{}");
@@ -70,16 +76,3 @@ return json(200, {
   }
 }
 
-// Helper (if not imported elsewhere)
-function intOr(val, def) {
-  const n = parseInt(val, 10);
-  return isNaN(n) ? def : n;
-}
-
-function json(status, body) {
-  return {
-    statusCode: status,
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json' },
-  };
-}
