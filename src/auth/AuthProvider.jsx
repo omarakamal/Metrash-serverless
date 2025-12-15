@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
     const res = await fetch('/.netlify/functions/login', {
       method: 'POST',
       credentials: 'include', // must include cookies
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Tdype': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 

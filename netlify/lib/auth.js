@@ -18,14 +18,11 @@ export function verifyAccessToken(token) {
 }
 
 export function getTokenFromEvent(event) {
-  console.log('getTokenFromEventCalled', event)
   const h = event.headers || {};
   const auth = h.authorization || h.Authorization;
-  console.log(auth)
   if (auth && auth.startsWith("Bearer ")) return auth.slice(7);
 
   const raw = h.cookie || h.Cookie || "";
-  console.log('raw: ',raw)
   const name = cookieName() + "=";
   for (const part of raw.split(/;\s*/)) {
     if (part.startsWith(name)) return part.slice(name.length);
@@ -63,8 +60,7 @@ export function clearAuthCookieHeaders() {
 // Only allow admins (all logged-in users are admins)
 export function requireAdmin(event) {
   const token = getTokenFromEvent(event);
-  console.log('token',token)
-  if (!token) return { ok: false, status: 401, body: { message: "You are not logged in" } };
+  if (!token) return { ok: false, status: 401, body: { message: "missing token" } };
   try {
     const claims = verifyAccessToken(token);
     if (claims.role !== "admin") return { ok: false, status: 403, body: { message: "admin only" } };
@@ -73,4 +69,3 @@ export function requireAdmin(event) {
     return { ok: false, status: 401, body: { message: "invalid or expired token" } };
   }
 }
-

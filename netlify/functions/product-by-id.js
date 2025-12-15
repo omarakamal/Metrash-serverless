@@ -1,73 +1,87 @@
-import mongoose from "mongoose";
-import { openMongo } from "../lib/mongo-per-request.js";
-import { getProductModel } from "../lib/models/Product.js";
-import { json, UpdateProduct, getId } from "../lib/helpers/products.shared.js";
-import { requireAdmin } from "../lib/auth.js";
+import { db } from '../lib/db.js';
+import { products } from '../db/schema/product.js';
+import { eq } from 'drizzle-orm';
+import { json, UpdateProduct, getId } from '../lib/helpers.js';
 
 export async function handler(event) {
-  const { conn, close } = await openMongo();
-  const Product = getProductModel(conn);
-
   try {
-    const id = getId(event);
-    if (!id) return json(400, { message: "missing product id" });
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return json(400, { message: "invalid product id" });
-
-    if (event.httpMethod === "GET") {
-      const doc = await Product.findById(id).lean().exec();
-      if (!doc) return json(404, { message: "product not found" });
-      return json(200, doc);
+    const id = Number(getId(event));
+    if (!id || Number.isNaN(id)) {
+      return json(400, { message: 'invalid product id' });
     }
 
-    if (event.httpMethod === "PUT" || event.httpMethod === "PATCH") {
-      const gate = requireAdmin(event);
-      if (!gate.ok) return json(gate.status, gate.body);
+    // ─────────────────────────────
+    // GET /products/:id
+    // ─────────────────────────────
+    if (event.httpMethod === 'GET') {
+      const result = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, id))
+        .limit(1);
 
+      if (result.length === 0) {
+        return json(404, { message: 'product not found' });
+      }
+
+      return json(200, result[0]);
+    }
+
+    // ─────────────────────────────
+    // PUT / PATCH /products/:id
+    // ─────────────────────────────
+    if (event.httpMethod === 'PUT' || event.httpMethod === 'PATCH') {
       let body;
       try {
-        body = JSON.parse(event.body || "{}");
+        body = JSON.parse(event.body || '{}');
       } catch {
-        return json(400, { message: "invalid JSON body" });
+        return json(400, { message: 'invalid JSON body' });
       }
 
       const parsed = UpdateProduct.safeParse(body);
       if (!parsed.success) {
         return json(400, {
-          message: "invalid body",
+          message: 'invalid body',
           issues: parsed.error.format(),
         });
       }
 
-      const updated = await Product.findByIdAndUpdate(
-        id,
-        { $set: parsed.data },
-        { new: true, runValidators: true }
-      )
-        .lean()
-        .exec();
+      const updated = await db
+        .update(products)
+        .set(parsed.data)
+        .where(eq(products.id, id))
+        .returning();
 
-      if (!updated) return json(404, { message: "product not found" });
-      return json(200, updated);
+      if (updated.length === 0) {
+        return json(404, { message: 'product not found' });
+      }
+
+      return json(200, updated[0]);
     }
 
-    if (event.httpMethod === "DELETE") {
-      const gate = requireAdmin(event);
-      if (!gate.ok) return json(gate.status, gate.body);
+    // ─────────────────────────────
+    // DELETE /products/:id
+    // ─────────────────────────────
+    if (event.httpMethod === 'DELETE') {
+      const deleted = await db
+        .delete(products)
+        .where(eq(products.id, id))
+        .returning({ id: products.id });
 
-      const res = await Product.findByIdAndDelete(id).lean().exec();
-      if (!res) return json(404, { message: "product not found" });
+      if (deleted.length === 0) {
+        return json(404, { message: 'product not found' });
+      }
+
       return {
         statusCode: 204,
-        headers: { "Content-Type": "application/json" },
-        body: "",
+        headers: { 'Content-Type': 'application/json' },
+        body: '',
       };
     }
 
-    return json(405, { message: "Method not allowed" });
-  } catch (e) {
-    return json(500, { message: "server error", error: String(e) });
-  } finally {
-    await close(); // 🔒 always close
+    return json(405, { message: 'Method not allowed' });
+  } catch (err) {
+    console.error(err);
+    return json(500, { message: 'server error', error: String(err) });
   }
 }

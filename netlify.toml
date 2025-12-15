@@ -25,38 +25,38 @@
   to   = "/.netlify/functions/products"
   status = 200
 
-[[redirects]]
-  from = "/api/products/:id"
-  to   = "/.netlify/functions/product-by-id/:id"
-  status = 200
+# [[redirects]]
+#   from = "/api/products/:id"
+#   to   = "/.netlify/functions/product-by-id/:id"
+#   status = 200
 
-[[redirects]]
-  from = "/api/auth/login"
-  to   = "/.netlify/functions/login"
-  status = 200
+# [[redirects]]
+#   from = "/api/auth/login"
+#   to   = "/.netlify/functions/login"
+#   status = 200
 
-[[redirects]]
-  from = "/api/auth/logout"
-  to   = "/.netlify/functions/logout"
-  status = 200
+# [[redirects]]
+#   from = "/api/auth/logout"
+#   to   = "/.netlify/functions/logout"
+#   status = 200
 
-[[redirects]]
-  from = "/api/seed-admin"
-  to   = "/.netlify/functions/auth-seed"
-  status = 200
+# [[redirects]]
+#   from = "/api/seed-admin"
+#   to   = "/.netlify/functions/auth-seed"
+#   status = 200
 
-[[redirects]]
-  from = "/api/auth/me"
-  to   = "/.netlify/functions/me"
-  status = 200
+# [[redirects]]
+#   from = "/api/auth/me"
+#   to   = "/.netlify/functions/me"
+#   status = 200
 
-[[redirects]]
-  from = "/auth/seed"
-  to   = "/.netlify/functions/seed"
-  status = 200
+# [[redirects]]
+#   from = "/auth/seed"
+#   to   = "/.netlify/functions/seed"
+#   status = 200
 
-# 2) SPA fallback for client-side routing - placed AFTER API rewrite
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# # 2) SPA fallback for client-side routing - placed AFTER API rewrite
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
