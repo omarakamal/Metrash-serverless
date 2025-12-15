@@ -29,8 +29,17 @@ export async function handler(event) {
 
       const totalResult = await countQuery;
       const items = await query.limit(pageSize).offset((page - 1) * pageSize);
+      const total = Number(totalResult[0].count);
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-      return json(200, { page, pageSize, total: totalResult[0].count, items });
+      console.log({ page, pageSize, total: totalResult[0].count, items })
+return json(200, {
+  page,
+  pageSize,
+  total,
+  totalPages,
+  items,
+});
     }
 
     // CREATE PRODUCT

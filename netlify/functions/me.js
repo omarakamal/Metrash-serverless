@@ -1,31 +1,45 @@
-// import { json } from "../lib/helpers/products.shared.js";
-// import { getTokenFromEvent, verifyAccessToken } from "../lib/auth.js";
-// import { openMongo } from "../lib/mongo-per-request.js";
-// import { getUserModel } from "../lib/models/User.js";
+import { json } from "../lib/helpers.js";
+import { getTokenFromEvent, verifyAccessToken } from "../lib/auth.js";
+import { db } from "../lib/db.js";
+import { users } from "../db/schema/user.js";
+import { eq } from "drizzle-orm";
 
-// export async function handler(event) {
-//   // console.log('event',event)
-//   const token = getTokenFromEvent(event);
-//   console.log(token)
-//   if (!token) return json(401, { message: "missing token" });
-//   try {
-//     // verify token to get claims
-//     const claims = verifyAccessToken(token);
+export async function handler(event) {
+  const token = getTokenFromEvent(event);
 
-//     // optional: fetch fresh user record from DB for extra info (roles, etc.)
-//     const { conn, close } = await openMongo();
-//     try {
-//       const User = getUserModel(conn);
-//       const user = await User.findById(claims.sub).lean().exec();
-//       if (!user) return json(401, { message: "user not found" });
+  if (!token) {
+    return json(401, { message: "missing token" });
+  }
 
-//       // Shape the returned object to what frontend expects
-//       return json(200, { user: { id: String(user._id), email: user.email, role: claims.role || user.role } });
-//     } finally {
-//       await close();
-//     }
+  try {
+    // Verify JWT
+    const claims = verifyAccessToken(token);
 
-//   } catch (err) {
-//     return json(401, { message: "invalid or expired token" });
-//   }
-// }
+    // Fetch user from Postgres
+    const [user] = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, claims.sub))
+      .limit(1);
+
+    if (!user) {
+      return json(401, { message: "user not found" });
+    }
+
+    // Shape response exactly like before
+    return json(200, {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: claims.role || user.role,
+      },
+    });
+
+  } catch (err) {
+    return json(401, { message: "invalid or expired token" });
+  }
+}

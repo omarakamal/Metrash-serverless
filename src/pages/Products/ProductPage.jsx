@@ -26,6 +26,7 @@ export default function ProductsPage(){
     (async () => {
       try {
         setLoading(true); setError("");
+        console.log(page)
         const json = await fetchProducts({ name, minPrice, maxPrice, page, limit });
         if (on) setData(json);
       } catch (e) {
@@ -50,6 +51,10 @@ export default function ProductsPage(){
     setSearchParams({ page: "1", limit: String(limit) });
   };
 
+  useEffect(()=>{
+    console.log('Data Du',data)
+  },[data])
+
 
   function areParamsPresent(){
     return searchParams.get("maxPrice") || searchParams.get("minPrice") || searchParams.get("name")
@@ -64,7 +69,7 @@ export default function ProductsPage(){
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900">Products</h1>
-                {areParamsPresent() ? <p className="mt-1 text-sm text-slate-600">{data.totalItems} item(s) found</p> : <p className="mt-1 text-sm text-slate-600">{data.totalItems} item(s)Total</p>}
+                {areParamsPresent() ? <p className="mt-1 text-sm text-slate-600">{data.total} item(s) found</p> : <p className="mt-1 text-sm text-slate-600">{data.total} item(s)Total</p>}
 
          
               </div>

@@ -13,7 +13,7 @@ export default function HighlightedItems() {
     (async () => {
       try {
         setLoading(true);
-        const data = await fetchProducts({ limit: 8 });
+        const data = await fetchProducts({ limit: 4 });
         console.log("FETCHED PRODUCTS HIGHLIGHTED: ", data);
         if (on) setItems(data.items || []);
       } catch (e) {
